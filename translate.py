@@ -3,6 +3,7 @@ import os
 import polib
 import openai
 import time
+from babel import Locale
 
 # Run the command below to translate a .PO file using the OpenAI API:
 #  python translate.py <path_to_your_file.po> --lang <language_code> --model <model_name>
