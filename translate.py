@@ -14,7 +14,7 @@ import time
 openai.api_key = "your_openai_api_key"
 
 # Batch size for API requests
-BATCH_SIZE = 1
+BATCH_SIZE = 10
 
 def translate_batch(batch, target_language, model):
     """Translate a batch of text entries."""
