@@ -16,12 +16,20 @@ openai.api_key = "your_openai_api_key"
 # Batch size for API requests
 BATCH_SIZE = 10
 
+def get_language_from_iso(iso_code):
+    """Convert ISO code (e.g., 'es_uy') to full language name."""
+    try:
+        locale = Locale.parse(iso_code, sep="_")
+        return f"{locale.get_display_name(locale.language)} ({locale.territory})" if locale.territory else locale.get_display_name(locale.language)
+    except Exception as e:
+        raise ValueError(f"Invalid ISO code '{iso_code}': {e}")
+
 def translate_batch(batch, target_language, model):
     """Translate a batch of text entries."""
     try:
         # Build a list of translation prompts
         messages = [
-            {"role": "system", "content": f"You are a helpful assistant who translates text into {target_language}."}
+            {"role": "system", "content": f"You are a helpful assistant fluent in {target_language} who translates text into {target_language}. The translations should be accurate and natural."},
         ]
         for text in batch:
             messages.append({"role": "user", "content": f"Translate to {target_language}: {text}"})
@@ -75,7 +83,7 @@ def translate_po_file(input_file, target_language, model):
         print(f"Batch {i // BATCH_SIZE + 1} saved to file.")
 
         # Delay to prevent hitting API rate limits
-        time.sleep(1)
+        time.sleep(2)
 
     print(f"Translation completed and saved to {input_file}.")
 
@@ -88,7 +96,7 @@ def main():
     args = parser.parse_args()
 
     input_file = args.input_file
-    target_language = args.lang
+    iso_code = args.lang
     model = args.model
 
     # Validate input file
@@ -98,6 +106,13 @@ def main():
 
     if not os.path.exists(input_file):
         print(f"Error: File '{input_file}' does not exist.")
+        exit(1)
+
+    # Map ISO code to full language name
+    try:
+        target_language = get_language_from_iso(iso_code)
+    except ValueError as e:
+        print(e)
         exit(1)
 
     # Translate the file
